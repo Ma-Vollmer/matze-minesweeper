@@ -1,7 +1,9 @@
 <template>
   <img alt="Vue logo" src="./assets/logo.png">
   <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <Board msg="Board :thumbsup:"/>
   <button @click="test">count is {{count}}</button>
+  <button @click="reveal">reveal: {{count}}</button>
 </template>
 
 <script>
@@ -15,14 +17,19 @@ export default {
   },
   data() {
     return {
-        count: 0
+        count: "test"
     }
   },
   methods: {
-       test: function test(){
-           this.count++;
-           invoke('new_board')
-       }
+        test: function test(){invoke()},
+        reveal: function reveal(){
+            invoke('reveal', {x: 7, y:7}).then((message) => {
+                        this.count = message
+                    })
+        },
+        mark: function mark(){
+            invoke('mark');
+        }
   },
 }
 </script>

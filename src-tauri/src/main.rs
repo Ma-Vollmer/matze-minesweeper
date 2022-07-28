@@ -5,12 +5,13 @@
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![new_board])
+        .invoke_handler(tauri::generate_handler![mark])
+        .invoke_handler(tauri::generate_handler![reveal])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
-use std::{cell::RefCell, ops::Deref};
-
+use std::cell::RefCell;
 use rand::Rng;
 
 #[derive(Debug)]
@@ -55,7 +56,7 @@ fn init_board () {
             cell.marked = false;
         }
         
-        for i in 0..10 {
+        for _i in 0..10 {
             // getting a free & random location for the bomb
             let mut rng = rand::thread_rng();
             let random: u8 = rng.gen_range(0..63);
@@ -194,27 +195,41 @@ fn rec_reveal(x: u8, y: u8, mut board: [[Cell; 8]; 8]) -> [[Cell; 8]; 8] {
     return board;
 }
 
-fn reveal (x: u8, y: u8) -> bool {
+#[tauri::command]
+fn reveal (x: u8, y: u8) -> bool{
     println!("it is in revealed!");
-    let result: bool = true;
+    let mut result: bool = true;
     BOARD.with(|b| {
         let mut temp_b = *b.borrow_mut();
-        if !temp_b[x as usize][ y as usize].revealed{
-            temp_b[x as usize][ y as usize].revealed = true;
-            if temp_b[x as usize][ y as usize].value == 0 {
-                temp_b = rec_reveal(x, y, temp_b);
-            }
-        }
-
+        temp_b[x as usize][y as usize].revealed = true;
+        if temp_b[x as usize][y as usize].value == 0 { temp_b = rec_reveal(x, y, temp_b) };
+        if temp_b[x as usize][y as usize].value >= 9 { result = false };
         *b.borrow_mut() = temp_b;
     });
 
     return result;
 }
 
-fn print_board () {
+#[tauri::command]
+fn mark (x: u8, y: u8) -> bool{
+    let mut won = true;
     BOARD.with(|b| {
         let mut temp_b = *b.borrow_mut();
+        temp_b[x as usize][y as usize].marked = !temp_b[x as usize][y as usize].marked;
+
+        //check if you have won - return true if yes
+        for cell in temp_b.iter_mut().flat_map(|c| c.iter_mut()) {
+            if cell.marked && cell.value<8 { won = false }
+            if !cell.marked && cell.value>8 { won = false }
+        }
+        *b.borrow_mut() = temp_b;
+    });
+    return won;
+}
+
+fn print_board () {
+    BOARD.with(|b| {
+        let temp_b = *b.borrow_mut();
         println!("{:#?}", b);
         *b.borrow_mut() = temp_b;
     })
