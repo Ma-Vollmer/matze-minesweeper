@@ -1,19 +1,21 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
-  <Board msg="Board :thumbsup:"/>
-  <button @click="test">count is {{count}}</button>
-  <button @click="reveal">reveal: {{count}}</button>
+    <img alt="Vue logo" src="./assets/logo.png">
+    <!--  <HelloWorld msg="Welcome to Your Vue.js App"/> -->
+    <CellButton x="7" y="7"/>
+    <Board msg="Board :thumbsup:"/>
+    <button @click="test">count is {{count}}</button>
+    <button @click="reveal">reveal: {{count}}</button>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+//import HelloWorld from './components/HelloWorld.vue'
+import CellButton from './components/CellButton.vue'
 import { invoke } from "@tauri-apps/api/tauri"
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+      CellButton
   },
   data() {
     return {
@@ -23,7 +25,7 @@ export default {
   methods: {
         test: function test(){invoke()},
         reveal: function reveal(){
-            invoke('reveal', {x: 7, y:7}).then((message) => {
+            invoke('reveal', {x: 7, y: 7}).then((message) => {
                         this.count = message
                     })
         },
