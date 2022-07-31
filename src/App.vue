@@ -3,8 +3,9 @@
     <!--  <HelloWorld msg="Welcome to Your Vue.js App"/> -->
     <CellButton x="7" y="7"/>
     <Board msg="Board :thumbsup:"/>
-    <button @click="test">count is {{count}}</button>
-    <button @click="reveal">reveal: {{count}}</button>
+    <button @click="mark">count is {{count}}</button>
+    <button @click="initBoard">new Game {{count}}</button>
+    <div id="board"></div>
 </template>
 
 <script>
@@ -23,6 +24,32 @@ export default {
     }
   },
   methods: {
+        initBoard: function initBoard(){
+            this.count = "yea";
+this.count = "please";
+            invoke('new_Board');
+            let table = document.createElement('table');
+            let thead = document.createElement('thead');
+            let tbody = document.createElement('tbody');
+
+            table.appendChild(thead);
+            table.appendChild(tbody);
+
+
+            for (let y=0; y<8; y++){
+                let row = document.createElement('tr');
+                //let heading = document.createElement('td');
+                for (let x=0; x<8; x++){
+                    let row_data = document.createElement('td');
+                    row_data.innerHTML = x;
+                    row.appendChild(row_data);
+                }
+                //heading.innerHTML = y;
+                thead.appendChild(row);
+            }
+
+            document.getElementById("board").appendChild(table);
+           },
         test: function test(){invoke()},
         reveal: function reveal(){
             invoke('reveal', {x: 7, y: 7}).then((message) => {
@@ -30,6 +57,7 @@ export default {
                     })
         },
         mark: function mark(){
+            document.getElementById("test").innerHTML='<p>yay</p>'
             invoke('mark');
         }
   },

@@ -5,6 +5,7 @@
 import { invoke } from '@tauri-apps/api/tauri'
 
 export default {
+    name: "CellButton",
     props: {
         x: String,
         y: String
