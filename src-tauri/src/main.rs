@@ -4,9 +4,7 @@
 )]
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![new_board])
-        .invoke_handler(tauri::generate_handler![mark])
-        .invoke_handler(tauri::generate_handler![reveal])
+        .invoke_handler(tauri::generate_handler![new_board, reveal, mark, get_info])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -40,9 +38,27 @@ thread_local!(static BOARD: RefCell<[[Cell; 8]; 8]> = RefCell::new([[Cell::new()
 
 #[tauri::command]
 fn new_board() {
+    println!("yea, it's here");
     init_board();
     reveal(7, 7);
     print_board();
+}
+
+#[tauri::command]
+fn get_info(x: u8, y: u8) -> String{
+    BOARD.with(|b|{
+        let temp_b = *b.borrow();
+        if !temp_b[x as usize][y as usize].revealed{
+            return String::from("unrevealed");
+        }
+        if temp_b[x as usize][y as usize].marked{
+            return String::from("marked");
+        }
+        if temp_b[x as usize][y as usize].value < 8{
+            return temp_b[x as usize][y as usize].value.to_string();
+        }
+        return String::from("bomb");
+    })
 }
 
 fn init_board () {
