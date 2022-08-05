@@ -150,79 +150,74 @@ fn init_board () {
     })
 }
 
-fn rec_reveal(x: u8, y: u8, mut board: [[Cell; 8]; 8]) -> [[Cell; 8]; 8] {
-    board[x as usize][y as usize].revealed = true;
-    if board[x as usize][ y as usize].revealed || board[x as usize][ y as usize].value > 0 { return board; }
-                if x==0 && y==0 {
-                    rec_reveal(x+1, y+1, board);
-                    rec_reveal(x+1, y, board);
-                    rec_reveal(x, y+1, board);
-                    rec_reveal(x-1, y+1, board);
-                    rec_reveal(x-1, y, board);
-                    rec_reveal(x-1, y-1, board);
-                } else if x==7 && y==7 {
-                    rec_reveal(x, y-0, board);
-                    rec_reveal(x-1, y, board);
-                    rec_reveal(x-1, y-1, board);
-                } else if x==0 && y==7 {
-                    rec_reveal(x+1, y, board);
-                    rec_reveal(x+1, y-1, board);
-                    rec_reveal(x, y-0, board);
-                }else if x==7 && y==0 {
-                    rec_reveal(x, y+1, board);
-                    rec_reveal(x-1, y+1, board);
-                    rec_reveal(x-1, y, board);
-                }else if x==7 {
-                    rec_reveal(x, y+1, board);
-                    rec_reveal(x, y-0, board);
-                    rec_reveal(x-1, y+1, board);
-                    rec_reveal(x-1, y, board);
-                    rec_reveal(x-1, y-1, board);
-                }else if x==0 {
-                    rec_reveal(x+1, y+1, board);
-                    rec_reveal(x+1, y, board);
-                    rec_reveal(x+1, y-1, board);
-                    rec_reveal(x, y+1, board);
-                    rec_reveal(x, y-0, board);
-                }else if y==7 {
-                    rec_reveal(x+1, y, board);
-                    rec_reveal(x+1, y-1, board);
-                    rec_reveal(x, y-0, board);
-                    rec_reveal(x-1, y, board);
-                    rec_reveal(x-1, y-1, board);
-                }else if y==0 {
-                    rec_reveal(x+1, y+1, board);
-                    rec_reveal(x+1, y, board);
-                    rec_reveal(x, y+1, board);
-                    rec_reveal(x-1, y+1, board);
-                    rec_reveal(x-1, y, board);
-                }else {
-                    //default case
-                    rec_reveal(x+1, y+1, board);
-                    rec_reveal(x+1, y, board);
-                    rec_reveal(x+1, y-1, board);
-                    rec_reveal(x, y+1, board);
-                    rec_reveal(x, y-0, board);
-                    rec_reveal(x-1, y+1, board);
-                    rec_reveal(x-1, y, board);
-                    rec_reveal(x-1, y-1, board);
-                }
-
-    return board;
-}
-
 #[tauri::command]
 fn reveal (x: u8, y: u8) -> bool{
     println!("it is in revealed!");
-    let mut result: bool = true;
+    let val: u8 = 0;
+    let mut rec: bool = false;      // was the square revealed? if yes go into recursion, done&checked later
+    let mut result: bool = true;    // is the value of the revealed square 0? if yes go into recursion, done&checked later
     BOARD.with(|b| {
         let mut temp_b = *b.borrow_mut();
+        if temp_b[x as usize][y as usize].value == 0 && !temp_b[x as usize][y as usize].revealed { 
+            rec = true;
+        };
         temp_b[x as usize][y as usize].revealed = true;
-        if temp_b[x as usize][y as usize].value == 0 { temp_b = rec_reveal(x, y, temp_b) };
         if temp_b[x as usize][y as usize].value >= 9 { result = false };
         *b.borrow_mut() = temp_b;
     });
-
+        if val == 0 && rec{
+                if x==0 && y==0 {
+                    reveal(x+1, y+1);
+                    reveal(x+1, y);
+                    reveal(x, y+1);
+                } else if x==7 && y==7 {
+                    reveal(x, y-0);
+                    reveal(x-1, y);
+                    reveal(x-1, y-1);
+                } else if x==0 && y==7 {
+                    reveal(x+1, y);
+                    reveal(x+1, y-1);
+                    reveal(x, y-0);
+                }else if x==7 && y==0 {
+                    reveal(x, y+1);
+                    reveal(x-1, y+1);
+                    reveal(x-1, y);
+                }else if x==7 {
+                    reveal(x, y+1);
+                    reveal(x, y-0);
+                    reveal(x-1, y+1);
+                    reveal(x-1, y);
+                    reveal(x-1, y-1);
+                }else if x==0 {
+                    reveal(x+1, y+1);
+                    reveal(x+1, y);
+                    reveal(x+1, y-1);
+                    reveal(x, y+1);
+                    reveal(x, y-0);
+                }else if y==7 {
+                    reveal(x+1, y);
+                    reveal(x+1, y-1);
+                    reveal(x, y-0);
+                    reveal(x-1, y);
+                    reveal(x-1, y-1);
+                }else if y==0 {
+                    reveal(x+1, y+1);
+                    reveal(x+1, y);
+                    reveal(x, y+1);
+                    reveal(x-1, y+1);
+                    reveal(x-1, y);
+                }else {
+                    //default case
+                    reveal(x+1, y+1);
+                    reveal(x+1, y);
+                    reveal(x+1, y-1);
+                    reveal(x, y+1);
+                    reveal(x, y-0);
+                    reveal(x-1, y+1);
+                    reveal(x-1, y);
+                    reveal(x-1, y-1);
+                }
+        }
     return result;
 }
 
