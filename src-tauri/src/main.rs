@@ -153,9 +153,8 @@ fn init_board () {
 #[tauri::command]
 fn reveal (x: u8, y: u8) -> bool{
     println!("it is in revealed!");
-    let val: u8 = 0;
-    let mut rec: bool = false;      // was the square revealed? if yes go into recursion, done&checked later
-    let mut result: bool = true;    // is the value of the revealed square 0? if yes go into recursion, done&checked later
+    let mut rec: bool = false;      // will we need a recursion?
+    let mut result: bool = true;
     BOARD.with(|b| {
         let mut temp_b = *b.borrow_mut();
         if temp_b[x as usize][y as usize].value == 0 && !temp_b[x as usize][y as usize].revealed { 
@@ -165,7 +164,7 @@ fn reveal (x: u8, y: u8) -> bool{
         if temp_b[x as usize][y as usize].value >= 9 { result = false };
         *b.borrow_mut() = temp_b;
     });
-        if val == 0 && rec{
+        if rec {
                 if x==0 && y==0 {
                     reveal(x+1, y+1);
                     reveal(x+1, y);
